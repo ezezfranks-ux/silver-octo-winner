@@ -1,10 +1,11 @@
 [
-    {
+  {
     "id": -1,
     "name": "Flappy Arby",
-    "cover": "https://cdn.jsdelivr.net/gh/ezezfranks-ux/silver-octo-winner@main/arby.png",
-    "url": "https://cdn.jsdelivr.net/gh/ezezfranks-ux/silver-octo-winner@main/bobloxc.html",
     "author": "BB Co",
-    "authorLink": "https://alexwatti.my.canva.site/twopoint"
-  },
+    "cover": "{MY_URL}/arby.png",
+    "url": "{MY_URL}/bobloxc.html",
+    "featured": true,
+    "special": []
+  }
 ]
