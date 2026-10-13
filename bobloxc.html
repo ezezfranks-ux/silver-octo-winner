@@ -1,0 +1,505 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flappy Arby</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet">
+<style>
+  /* Layout: one centered portrait game canvas, title above, controls hint below. Single dark look by choice (night-sky game). */
+  :root {
+    --bg: #0c1424;
+    --fg: #eef0f6;
+    --muted: #8f9bb8;
+    --accent: #e8333f;
+    --panel: #16213a;
+    --line: #2a3a5e;
+    --display: "Bowlby One", Impact, "Arial Black", sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    padding-inline: 16px;
+    padding-block: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    width: min(100%, 420px);
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    margin: 0;
+    color: var(--accent);
+    text-wrap: balance;
+  }
+  #sound {
+    font: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  #sound:hover { color: var(--fg); border-color: var(--muted); }
+  #sound:focus-visible, #stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #stage {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline-offset: -2px;
+  }
+  canvas {
+    display: block;
+    touch-action: none;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px var(--line), 0 12px 40px rgba(0, 0, 0, 0.5);
+    background: #1b2d52;
+  }
+  .hint { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+  kbd {
+    font-family: inherit;
+    font-size: 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    background: var(--panel);
+    color: var(--fg);
+  }
+</style>
+
+<header>
+  <h1>Flappy Arby</h1>
+  <button id="sound" type="button" aria-pressed="true">Sound on</button>
+</header>
+<div id="stage" tabindex="0" aria-label="Flappy Arby game. Press space or tap to flap.">
+  <canvas id="game" width="360" height="560"></canvas>
+</div>
+<p class="hint"><kbd>Space</kbd>, click or tap to flap. Squeeze through the gaps.</p>
+
+<script>
+(function () {
+  var W = 360, H = 560, GROUND = 64;
+  var BX = 92, R = 15;                 // Arby's x position and hitbox radius
+  var GRAV = 0.42, FLAP = -7.3, MAXFALL = 11;
+  var PW = 58, GAP = 150, SPACING = 200, SPEED = 2.5;
+
+  var cv = document.getElementById('game');
+  var ctx = cv.getContext('2d');
+  var stage = document.getElementById('stage');
+  var soundBtn = document.getElementById('sound');
+  var scale = 1;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- persistence ----------
+  var best = 0;
+  try { best = parseInt(localStorage.getItem('flappy-arby-best') || '0', 10) || 0; } catch (e) {}
+  function saveBest() { try { localStorage.setItem('flappy-arby-best', String(best)); } catch (e) {} }
+
+  // ---------- sound ----------
+  var audio = null, soundOn = true;
+  function beep(freq, dur, type, vol, slideTo) {
+    if (!soundOn) return;
+    try {
+      if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      var o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime;
+      o.type = type || 'square';
+      o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+      g.gain.setValueAtTime(vol || 0.06, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(audio.destination);
+      o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+  soundBtn.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? 'Sound on' : 'Sound off';
+    soundBtn.setAttribute('aria-pressed', String(soundOn));
+    soundBtn.blur();
+  });
+
+  // ---------- world ----------
+  var stars = [];
+  (function () {
+    var s = 7;
+    function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
+    for (var i = 0; i < 46; i++) stars.push({ x: rnd() * W, y: rnd() * (H - GROUND - 150), r: 0.6 + rnd() * 1.3, tw: rnd() * 6 });
+    // skyline
+    var x = 0; window.__sky = [];
+    while (x < 760) {
+      var w = 26 + rnd() * 38, h = 40 + rnd() * 110;
+      window.__sky.push({ x: x, w: w, h: h, win: Math.floor(rnd() * 1000) });
+      x += w + 2;
+    }
+  })();
+  var SKYLEN = 760;
+
+  var state = 'ready';          // ready | playing | dead
+  var y, vy, angle, pipes, score, gx, sx, flash, shake, deadAt, t0, newBest;
+
+  function reset() {
+    y = H * 0.42; vy = 0; angle = 0; pipes = []; score = 0;
+    flash = 0; shake = 0; deadAt = 0; newBest = false;
+    state = 'ready';
+  }
+  gx = 0; sx = 0; t0 = 0;
+  reset();
+
+  function spawnPipe(x) {
+    var min = 70 + GAP / 2, max = H - GROUND - 60 - GAP / 2;
+    pipes.push({ x: x, gapY: min + Math.random() * (max - min), passed: false });
+  }
+
+  function start() {
+    state = 'playing';
+    pipes = [];
+    spawnPipe(W + 60);
+    vy = FLAP;
+    beep(520, 0.12, 'square', 0.05, 820);
+  }
+
+  function die() {
+    if (state === 'dead') return;
+    state = 'dead';
+    flash = 1;
+    shake = reduceMotion ? 0 : 10;
+    deadAt = performance.now();
+    if (score > best) { best = score; newBest = true; saveBest(); }
+    beep(220, 0.28, 'sawtooth', 0.07, 70);
+  }
+
+  function flap() {
+    if (state === 'ready') { start(); return; }
+    if (state === 'playing') {
+      vy = FLAP;
+      beep(520, 0.1, 'square', 0.045, 840);
+      return;
+    }
+    if (state === 'dead' && performance.now() - deadAt > 550) reset();
+  }
+
+  // ---------- input ----------
+  stage.addEventListener('pointerdown', function (ev) {
+    if (ev.target === soundBtn) return;
+    ev.preventDefault();
+    flap();
+  });
+  window.addEventListener('keydown', function (ev) {
+    if (ev.code === 'Space' || ev.code === 'ArrowUp' || ev.code === 'KeyW') {
+      ev.preventDefault();
+      if (!ev.repeat) flap();
+    } else if (ev.code === 'KeyM') {
+      soundBtn.click();
+    }
+  });
+
+  // ---------- sizing ----------
+  function fit() {
+    var aw = stage.clientWidth, ah = stage.clientHeight;
+    var s = Math.max(0.2, Math.min(aw / W, ah / H));
+    var dpr = window.devicePixelRatio || 1;
+    cv.style.width = Math.floor(W * s) + 'px';
+    cv.style.height = Math.floor(H * s) + 'px';
+    cv.width = Math.round(W * s * dpr);
+    cv.height = Math.round(H * s * dpr);
+    scale = (W * s * dpr) / W;
+  }
+  window.addEventListener('resize', fit);
+  fit();
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+  // ---------- update ----------
+  function hitsPipe(p) {
+    var rects = [
+      [p.x, 0, PW, p.gapY - GAP / 2],
+      [p.x, p.gapY + GAP / 2, PW, H]
+    ];
+    for (var i = 0; i < 2; i++) {
+      var r = rects[i];
+      var cx = Math.max(r[0], Math.min(BX, r[0] + r[2]));
+      var cy = Math.max(r[1], Math.min(y, r[1] + r[3]));
+      var dx = BX - cx, dy = y - cy;
+      if (dx * dx + dy * dy < (R - 1) * (R - 1)) return true;
+    }
+    return false;
+  }
+
+  function update(dt) {
+    sx += SPEED * 0.25 * dt * (state === 'dead' ? 0 : 1);
+    if (state !== 'dead') gx += SPEED * dt;
+
+    if (state === 'ready') {
+      y = H * 0.42 + Math.sin(performance.now() / 260) * 7;
+      angle = 0;
+      return;
+    }
+
+    vy = Math.min(MAXFALL, vy + GRAV * dt);
+    y += vy * dt;
+    var target = Math.max(-0.45, Math.min(1.3, vy * 0.07));
+    angle += (target - angle) * Math.min(1, 0.25 * dt);
+
+    if (y < R) { y = R; if (vy < 0) vy = 0; }
+
+    if (state === 'playing') {
+      for (var i = 0; i < pipes.length; i++) {
+        var p = pipes[i];
+        p.x -= SPEED * dt;
+        if (!p.passed && p.x + PW < BX - R) {
+          p.passed = true; score++;
+          beep(880, 0.09, 'triangle', 0.06, 1180);
+        }
+        if (hitsPipe(p)) { die(); break; }
+      }
+      while (pipes.length && pipes[0].x < -PW - 20) pipes.shift();
+      var last = pipes[pipes.length - 1];
+      if (last && last.x < W - SPACING + 40 && last.x + SPACING < W + 120) spawnPipe(last.x + SPACING);
+      if (y + R > H - GROUND) { y = H - GROUND - R; die(); }
+    }
+
+    if (state === 'dead') {
+      if (y + R > H - GROUND) { y = H - GROUND - R; vy = 0; angle += (1.4 - angle) * 0.2; }
+    }
+    if (flash > 0) flash = Math.max(0, flash - 0.06 * dt);
+    if (shake > 0) shake = Math.max(0, shake - 0.7 * dt);
+  }
+
+  // ---------- drawing ----------
+  function rr(x, yy, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, yy, w, h, r); else ctx.rect(x, yy, w, h);
+  }
+
+  function drawSky(now) {
+    var g = ctx.createLinearGradient(0, 0, 0, H - GROUND);
+    g.addColorStop(0, '#101c3a');
+    g.addColorStop(0.65, '#2b4a82');
+    g.addColorStop(1, '#5d7fb5');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      ctx.globalAlpha = 0.45 + 0.4 * Math.sin(now / 700 + s.tw);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // moon
+    ctx.fillStyle = '#f1ead2';
+    ctx.beginPath(); ctx.arc(286, 86, 24, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = '#d9d0b0';
+    ctx.beginPath(); ctx.arc(278, 80, 5, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(294, 94, 3.5, 0, 6.2832); ctx.fill();
+
+    // skyline, scrolling slowly
+    var off = -(sx % SKYLEN);
+    for (var k = 0; k < 2; k++) {
+      for (var j = 0; j < window.__sky.length; j++) {
+        var b = window.__sky[j];
+        var bx = b.x + off + k * SKYLEN;
+        if (bx > W || bx + b.w < 0) continue;
+        ctx.fillStyle = '#1a2a4d';
+        ctx.fillRect(bx, H - GROUND - b.h, b.w, b.h);
+        ctx.fillStyle = 'rgba(255, 220, 140, 0.55)';
+        for (var wy = H - GROUND - b.h + 8; wy < H - GROUND - 8; wy += 14) {
+          for (var wx = bx + 5; wx < bx + b.w - 7; wx += 10) {
+            if (((wx * 7 + wy * 3 + b.win) | 0) % 5 === 0) ctx.fillRect(wx, wy, 4, 5);
+          }
+        }
+      }
+    }
+  }
+
+  function drawPipe(p) {
+    var topH = p.gapY - GAP / 2, botY = p.gapY + GAP / 2;
+    var CAP = 24, EXT = 5;
+    function body(x, yy, w, h) {
+      ctx.fillStyle = '#2c9a86'; ctx.fillRect(x, yy, w, h);
+      ctx.fillStyle = '#58c4ad'; ctx.fillRect(x + 5, yy, 8, h);
+      ctx.fillStyle = '#1f6f61'; ctx.fillRect(x + w - 11, yy, 11, h);
+    }
+    body(p.x, 0, PW, topH - CAP);
+    body(p.x - EXT, topH - CAP, PW + EXT * 2, CAP);
+    body(p.x, botY + CAP, PW, H - botY);
+    body(p.x - EXT, botY, PW + EXT * 2, CAP);
+    ctx.fillStyle = 'rgba(8, 24, 30, 0.45)';
+    ctx.fillRect(p.x - EXT, topH - 2, PW + EXT * 2, 2);
+    ctx.fillRect(p.x - EXT, botY + CAP - 2, PW + EXT * 2, 2);
+  }
+
+  function drawGround() {
+    ctx.fillStyle = '#3a2c20'; ctx.fillRect(0, H - GROUND, W, GROUND);
+    ctx.fillStyle = '#6fb04a'; ctx.fillRect(0, H - GROUND, W, 10);
+    ctx.fillStyle = '#4f8a33';
+    var off = -(gx % 24);
+    for (var x = off; x < W + 24; x += 24) {
+      ctx.beginPath();
+      ctx.moveTo(x, H - GROUND + 10); ctx.lineTo(x + 12, H - GROUND + 10); ctx.lineTo(x + 6, H - GROUND + 2);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#2b2018';
+    for (var x2 = off; x2 < W + 24; x2 += 24) ctx.fillRect(x2 + 4, H - GROUND + 26, 10, 5);
+    for (var x3 = off + 12; x3 < W + 24; x3 += 24) ctx.fillRect(x3 + 4, H - GROUND + 42, 10, 5);
+  }
+
+  function drawArby(now) {
+    ctx.save();
+    ctx.translate(BX, y);
+    ctx.rotate(angle);
+
+    // the letter A: a solid red body with a triangular counter and a crossbar
+    ctx.beginPath();
+    ctx.moveTo(-22, 24); ctx.lineTo(-9, -24); ctx.lineTo(9, -24); ctx.lineTo(22, 24);
+    ctx.lineTo(10, 24); ctx.lineTo(8, 14); ctx.lineTo(-8, 14); ctx.lineTo(-10, 24);
+    ctx.closePath();
+    ctx.moveTo(-4.5, 6); ctx.lineTo(0, -3); ctx.lineTo(4.5, 6); ctx.closePath();
+    ctx.fillStyle = '#e8333f';
+    ctx.fill('evenodd');
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#7d1119';
+    ctx.stroke();
+
+    // highlight along the left edge
+    ctx.beginPath();
+    ctx.moveTo(-17, 20); ctx.lineTo(-7, -18);
+    ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255, 160, 160, 0.55)';
+    ctx.stroke();
+
+    // eyes
+    var blink = (state !== 'dead') && (Math.floor(now / 100) % 38 === 0);
+    var ex = [-5.5, 5.5];
+    for (var i = 0; i < 2; i++) {
+      var cx = ex[i], cy = -10;
+      if (state === 'dead') {
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx - 3.2, cy - 3.2); ctx.lineTo(cx + 3.2, cy + 3.2);
+        ctx.moveTo(cx + 3.2, cy - 3.2); ctx.lineTo(cx - 3.2, cy + 3.2);
+        ctx.stroke();
+        continue;
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx, cy, 5.6, 0, 6.2832); ctx.fill();
+      ctx.lineWidth = 1.2; ctx.strokeStyle = '#3a0a0e'; ctx.stroke();
+      if (blink) {
+        ctx.fillStyle = '#e8333f';
+        ctx.fillRect(cx - 6, cy - 6, 12, 7);
+        ctx.fillStyle = '#3a0a0e'; ctx.fillRect(cx - 5, cy + 0.5, 10, 1.6);
+      } else {
+        var py = Math.max(-1.8, Math.min(2.2, vy * 0.3));
+        ctx.fillStyle = '#16090b';
+        ctx.beginPath(); ctx.arc(cx + 1.6, cy + py, 2.5, 0, 6.2832); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(cx + 2.3, cy + py - 0.9, 0.8, 0, 6.2832); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function outlined(text, x, yy, size, fill) {
+    ctx.font = size + 'px "Bowlby One", Impact, "Arial Black", sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = Math.max(4, size / 6);
+    ctx.strokeStyle = '#0b1226';
+    ctx.strokeText(text, x, yy);
+    ctx.fillStyle = fill || '#ffffff';
+    ctx.fillText(text, x, yy);
+  }
+
+  function plain(text, x, yy, size, color, weight) {
+    ctx.font = (weight || 600) + ' ' + size + 'px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, yy);
+  }
+
+  function drawHud(now) {
+    if (state === 'playing') {
+      outlined(String(score), W / 2, 62, 46);
+    }
+    if (state === 'ready') {
+      outlined('FLAPPY ARBY', W / 2, 112, 34, '#ff5b66');
+      var pulse = 0.65 + 0.35 * Math.sin(now / 320);
+      ctx.globalAlpha = pulse;
+      outlined('TAP TO FLAP', W / 2, 330, 20);
+      ctx.globalAlpha = 1;
+      if (best > 0) plain('Best ' + best, W / 2, 364, 15, '#dbe4f7');
+    }
+    if (state === 'dead') {
+      var px = 40, pw = W - 80, py = 150, ph = 230;
+      ctx.fillStyle = 'rgba(9, 15, 32, 0.88)';
+      rr(px, py, pw, ph, 14); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#3a4d7c';
+      rr(px, py, pw, ph, 14); ctx.stroke();
+
+      outlined('GAME OVER', W / 2, py + 40, 28, '#ff5b66');
+      plain('SCORE', W / 2 - 55, py + 90, 12, '#8f9bb8', 700);
+      plain('BEST', W / 2 + 55, py + 90, 12, '#8f9bb8', 700);
+      ctx.font = '36px "Bowlby One", Impact, "Arial Black", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(String(score), W / 2 - 55, py + 124);
+      ctx.fillStyle = newBest ? '#ffd24a' : '#ffffff';
+      ctx.fillText(String(best), W / 2 + 55, py + 124);
+      if (newBest) plain('New best!', W / 2, py + 160, 14, '#ffd24a', 700);
+
+      var ready = performance.now() - deadAt > 550;
+      ctx.globalAlpha = ready ? (0.7 + 0.3 * Math.sin(now / 280)) : 0.3;
+      plain('Tap or press Space to retry', W / 2, py + 200, 15, '#eef0f6', 600);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ---------- loop ----------
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 16.667, 2.5);
+    last = now;
+    update(dt);
+
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+    drawSky(now);
+    for (var i = 0; i < pipes.length; i++) drawPipe(pipes[i]);
+    drawGround();
+    drawArby(now);
+    ctx.restore();
+    drawHud(now);
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + (flash * 0.7).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
