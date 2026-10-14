@@ -17,4 +17,13 @@
     "featured": true,
     "special": []
   }
+  {
+    "id": 2,
+    "name": "Baldi's Basics Plus",
+    "author": "mystman12",
+    "cover": "{MY_URL}/baldi.png",
+    "url": "{MY_URL}/baldi.html",
+    "featured": false,
+    "special": []
+  }
 ]
