@@ -26,4 +26,13 @@
     "featured": true,
     "special": []
   }
+    {
+    "id": 2,
+    "name": "Binding of Kyle",
+    "author": "Brandon and Alex",
+    "cover": "{MY_URL}/bindingofkyle.png",
+    "url": "{MY_URL}/bound.html",
+    "featured": true,
+    "special": []
+  }
 ]
