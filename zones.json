@@ -1,5 +1,14 @@
 [
   {
+    "id": -1,
+    "name": "Twopoint",
+    "author": "BB Co",
+    "cover": "{MY_URL}/two.png",
+    "url": "https://alexwatti.my.canva.site/twopoint",
+    "featured": true,
+    "special": []
+  },
+  {
     "id": 0,
     "name": "Flappy Arby",
     "author": "BB Co",
