@@ -25,14 +25,5 @@
     "url": "{MY_URL}/kyle.html",
     "featured": true,
     "special": []
-  },
-  {
-    "id": 2,
-    "name": "Bart Blast",
-    "author": "teleSTOP",
-    "cover": "{MY_URL}/download.jpg",
-    "url": "{MY_URL}/bart.html",
-    "featured": false,
-    "special": []
   }
 ]
