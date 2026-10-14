@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20261014-04-caa1adb","C":{"Abril Fatface":"YACgEZbkUVE,0","Albert Sans":"YAHO2HRfeh4,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo Black":"YACgEZulLoA,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Baloo 2":"YAHO2IcQUcM,0","Barlow Condensed":"YAFdJljEuFc,0","Barlow":"YAFdJsyuOPM,1","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFdJjTk5UU,1","Caveat":"YALBs2ploWQ,0","Cinzel":"YACgEeV8bIQ,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","Courier Prime":"YAD1aFjegN8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Figtree":"YAHO2b-mV7A,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAFdJpU7Kkk,0","Fredoka":"YACgEZml080,0","Georgia":"YAGzXkO0pEM,0","Hanken Grotesk":"YAHO2VB9G0I,0","Helvetica":"YAFcf7zkXN0,0","IBM Plex Mono":"YAFdJkmvhGI,0","IBM Plex Sans":"YAFdJgT0SHI,0","Impact":"YAFcfnjI7Vk,0","Instrument Sans":"YAHO2bKyaSQ,0","Instrument Serif":"YAHFeOnZNEk,0","Inter":"YAFdJvSyp_k,3","Italiana":"YAHO2Toik_w,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Josefin Sans":"YAFdJjvw9Ps,0","Karla":"YAHO2V2NSXM,0","Lato":"YAFdJuFCnaw,0","Libre Baskerville":"YACgEUFdPdA,0","Libre Caslon Display":"YAHO2XhLmt0,0","Lobster":"YAD8SnSjSFI,0","Lora":"YACgEXvxf8Q,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YAFdtQi73Xs,0","Noto Sans JP":"YAFdJiHXlcI,0","Noto Sans KR":"YAGsojZj-RQ,0","Nunito Sans":"YAFdtQJYB9w,1","Nunito":"YAFdJoNRMmU,1","Oleo Script":"YACgEQQ14jI,0","Oswald":"YACgEQY10lw,0","Outfit":"YAHO2nVlg14,0","Pacifico":"YADLjORQ1u4,0","Playfair Display":"YAFdJhem5V8,1","Plus Jakarta Sans":"YAHO2gdhi18,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Public Sans":"YAFdJj8NdaU,1","Quicksand":"YAFdJpYtCxE,1","Raleway":"YAFdJhmxbVQ,1","Roboto Slab":"YAFdJswIKAg,0","Rockwell":"YAFcfyVZnN0,0","Rye":"YACgEdQP21k,0","Sarabun":"YAFdJssSnME,0","Schibsted Grotesk":"YAHO2sWydRk,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Space Grotesk":"YAHO2sjPCSM,0","Space Mono":"YADW1-vpsoc,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Trebuchet MS":"YAFcfrglpVA,0","Ubuntu":"YACgERDU--Q,0","Verdana":"YAGzXTctYtQ,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0"}}');</script><script src="/_sdk/05db820ba1544614.telemetry_sdk.js" integrity="sha512-a7JzkQDDcioSXpM61nxTfeRW7PcxWQy5+BrhyeTFmQFsXJ+Gncm0y50u7fTA7qOPegFnRgqCfa0mGUOK1yjDWQ=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kyle Clicker</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #071326;
+      --panel: #102448;
+      --panel-dark: #091a35;
+      --mint: #a7ff38;
+      --mint-dark: #5dbd15;
+      --coin: #ffd84a;
+      --muted: #9fb7d7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: calc(100 * min(var(--vh, 1vh), 1vh));
+      color: #edf8ff;
+      font-family: "DM Sans", sans-serif;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(80, 148, 255, .24), transparent 25rem),
+        radial-gradient(circle at 84% 20%, rgba(167, 255, 56, .12), transparent 22rem),
+        linear-gradient(145deg, #061126 0%, #0a2145 55%, #061429 100%);
+    }
+
+    .space-field {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .space-field::before,
+    .space-field::after {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      pointer-events: none;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.72) 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(167,255,56,.52) 1px, transparent 1.7px);
+      background-size: 43px 43px, 97px 97px;
+      background-position: 0 0, 28px 42px;
+      opacity: .35;
+    }
+
+    .space-field::after {
+      background-image: radial-gradient(circle, rgba(255,216,74,.8) 1px, transparent 1.7px);
+      background-size: 133px 133px;
+      background-position: 18px 13px;
+      opacity: .3;
+    }
+
+    .game-shell {
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(183, 223, 255, .2);
+      background: rgba(7, 19, 38, .78);
+      border-radius: 24px;
+      padding: 20px 24px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+      backdrop-filter: blur(12px);
+      animation: rise .55s ease both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--mint);
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .coin-bank {
+      min-width: 165px;
+      padding: 12px 16px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, #ffd84a, #eea928);
+      color: #302100;
+      text-align: right;
+      box-shadow: 0 10px 24px rgba(255, 216, 74, .2);
+    }
+
+    .coin-label {
+      display: block;
+      font-family: "Space Mono", monospace;
+      font-size: .63rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .coin-number {
+      display: block;
+      font-family: "Space Mono", monospace;
+      font-size: 1.55rem;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr);
+      gap: 30px;
+      align-items: center;
+      margin: 34px 0;
+    }
+
+    .intro { animation: rise .55s .08s ease both; }
+
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .stat-pill {
+      padding: 9px 12px;
+      border: 1px solid rgba(183, 223, 255, .2);
+      background: rgba(12, 40, 76, .66);
+      border-radius: 999px;
+      font-family: "Space Mono", monospace;
+      font-size: .73rem;
+      color: #d9ecff;
+    }
+
+    .click-zone {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      animation: rise .55s .16s ease both;
+    }
+
+    .orbit {
+      position: absolute;
+      width: min(90vw, 420px);
+      aspect-ratio: 1;
+      border: 1px dashed rgba(167,255,56,.42);
+      border-radius: 50%;
+      animation: spin 16s linear infinite;
+    }
+
+    .orbit::before,
+    .orbit::after {
+      content: "";
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--coin);
+      box-shadow: 0 0 18px var(--coin);
+    }
+
+    .orbit::before { top: 8%; left: 18%; }
+    .orbit::after { bottom: 10%; right: 10%; background: var(--mint); box-shadow: 0 0 18px var(--mint); }
+
+    .alien-button {
+      position: relative;
+      z-index: 1;
+      width: min(78vw, 350px);
+      aspect-ratio: 1;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      cursor: pointer;
+      background: #118fd3;
+      box-shadow: 0 0 0 11px rgba(167,255,56,.16), 0 24px 45px rgba(0,0,0,.38), 0 0 44px rgba(76, 255, 78, .38);
+      transition: transform .12s ease, box-shadow .18s ease;
+    }
+
+    .alien-button:hover { transform: translateY(-5px) scale(1.015); }
+    .alien-button:active, .alien-button.popping { transform: scale(.94); box-shadow: 0 0 0 15px rgba(167,255,56,.24), 0 12px 25px rgba(0,0,0,.35), 0 0 72px rgba(167,255,56,.85); }
+    .alien-button:focus-visible, .upgrade-button:focus-visible { outline: 3px solid #ffffff; outline-offset: 4px; }
+
+    .alien-button img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.03);
+    }
+
+    .tap-caption {
+      z-index: 2;
+      margin-top: 21px;
+      padding: 9px 15px;
+      color: #062817;
+      border-radius: 999px;
+      background: var(--mint);
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .floating-coin {
+      position: absolute;
+      z-index: 3;
+      top: 44%;
+      left: 50%;
+      pointer-events: none;
+      color: var(--coin);
+      font-family: "Space Mono", monospace;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-shadow: 0 2px 0 #513c00, 0 0 18px rgba(255,216,74,.9);
+      animation: coinFloat .85s ease-out forwards;
+    }
+
+    .shop-panel {
+      padding: 25px;
+      border: 1px solid rgba(183, 223, 255, .2);
+      border-radius: 26px;
+      background: rgba(7, 21, 43, .83);
+      box-shadow: 0 20px 55px rgba(0,0,0,.25);
+      backdrop-filter: blur(12px);
+      animation: rise .55s .24s ease both;
+    }
+
+    .shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 15px;
+    }
+
+    .shop-status {
+      min-height: 24px;
+      margin: 0 0 14px;
+      color: #cfe4ff;
+      font-size: .9rem;
+    }
+
+    .upgrade-list { display: grid; gap: 12px; }
+
+    .upgrade-card {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      gap: 13px;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid rgba(183, 223, 255, .16);
+      border-radius: 18px;
+      background: linear-gradient(115deg, rgba(20, 53, 97, .9), rgba(9, 30, 62, .9));
+      transition: border-color .18s ease, transform .18s ease;
+    }
+
+    .upgrade-card:hover { transform: translateX(3px); border-color: rgba(167,255,56,.5); }
+
+    .upgrade-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: #051d12;
+      border-radius: 14px;
+      background: var(--mint);
+    }
+
+    .upgrade-icon.gold { background: var(--coin); color: #402b00; }
+    .upgrade-icon.blue { background: #70caff; color: #062346; }
+
+    .upgrade-name {
+      display: block;
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+
+    .upgrade-detail {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.35;
+    }
+
+    .upgrade-meta {
+      display: block;
+      margin-top: 6px;
+      color: var(--mint);
+      font-family: "Space Mono", monospace;
+      font-size: .68rem;
+      font-weight: 700;
+    }
+
+    .upgrade-button {
+      min-width: 84px;
+      padding: 10px 12px;
+      color: #08210e;
+      border: 0;
+      border-radius: 12px;
+      background: var(--mint);
+      cursor: pointer;
+      font-family: "Space Mono", monospace;
+      font-size: .72rem;
+      font-weight: 700;
+      transition: transform .16s ease, filter .16s ease, opacity .16s ease;
+    }
+
+    .upgrade-button:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+    .upgrade-button:disabled { cursor: not-allowed; opacity: .38; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes coinFloat {
+      0% { opacity: 0; transform: translate(-50%, 10px) scale(.75); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -95px) scale(1.15); }
+    }
+
+    @media (max-width: 760px) {
+      .topbar { align-items: flex-start; padding: 18px; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .intro { text-align: center; }
+      .stat-row { justify-content: center; }
+      .click-zone { order: -1; }
+      .shop-panel { padding: 18px; }
+      .upgrade-card { grid-template-columns: 42px minmax(0, 1fr); }
+      .upgrade-icon { width: 42px; height: 42px; }
+      .upgrade-button { grid-column: 2; justify-self: start; }
+    }
+
+    @media (max-width: 480px) {
+      .topbar { gap: 12px; }
+      .coin-bank { min-width: 123px; padding: 10px; }
+      .coin-number { font-size: 1.2rem; }
+      .shop-header { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/570d53629f0b998d.data_sdk.js" type="text/javascript" integrity="sha512-JEN39+V+Nvv9ZZOVS8vNk1iA9ErZJHTdgOw9KzPuMiK7m0I+KPEr/wmTnCFIQVsDjCZgJWfGnFi1IQh2Io2qyA=="></script>
+  <script src="/_sdk/0b63fb8940df03d4.editing_sdk.js" type="text/javascript" integrity="sha512-fFkkekAA7XKU9UcNO+7a7lGi1SDVYUdIo1lpZS9YpfVovu1WAj3C/MEr/w8zt6Jwq6OKflaYkwf4eOUpMYGz9A=="></script>
+  <script src="/_sdk/f195026a424c1f85.resizing_sdk.js" type="text/javascript" integrity="sha512-8On4Z+AXh1abEzZJ9Dbn9wOvFg+k1LsAaAzKGQ7LlfgXajZ9xEmZaZ1QVzv0AWhCZtCsEpWSOG9DgLri06TS7A=="></script>
+ </head>
+ <body data-template-id="__page-root" class="space-field" style="background: linear-gradient(145deg, rgb(6, 17, 38) 0%, rgb(10, 33, 69) 55%, rgb(6, 20, 41) 100%);">
+  <header class="game-shell">
+   <div data-template-id="game-header" class="canva-header topbar" style="background: rgb(7, 19, 38);">
+    <div>
+     <span data-template-id="header-kicker" class="eyebrow" style="color: rgb(167, 255, 56);"><i data-lucide="radio-tower" style="width:14px;height:14px"></i><span data-template-id="header-kicker-text" class="canva-text" style="color: rgb(167, 255, 56); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Pool signal detected</span></span>
+     <h1 data-template-id="game-title" class="canva-text m-0 mt-1 font-extrabold tracking-tight" style="color: rgb(242, 249, 255); font-weight: 800; font-style: normal; font-size: 32px;">Kyle Clicker</h1>
+    </div>
+    <div class="coin-bank" aria-live="polite">
+     <span data-template-id="coin-label" class="canva-text coin-label" style="color: rgb(48, 33, 0); font-weight: 700; font-style: normal; font-size: 10px; letter-spacing: 0.08rem;">Cosmic coins</span> <span id="coin-count" class="coin-number">0</span>
+    </div>
+   </div>
+  </header>
+  <main class="game-shell pt-0">
+   <section class="hero-grid" aria-labelledby="game-title">
+    <div class="intro">
+     <p data-template-id="game-intro" class="canva-text m-0 max-w-md text-lg leading-relaxed" style="color: rgb(217, 236, 255); font-weight: 400; font-style: normal; font-size: 18px; line-height: 1.5;">Kyle is floating in the pool. Tap the alien inflatable for coins, then grow your poolside upgrade crew.</p>
+     <div class="stat-row" aria-label="Current game statistics">
+      <span class="stat-pill"><span data-template-id="tap-stat-label" class="canva-text" style="color: rgb(217, 236, 255); font-weight: 700; font-style: normal; font-size: 11px;">PER TAP:</span> <strong id="tap-power">1</strong></span> <span class="stat-pill"><span data-template-id="miner-stat-label" class="canva-text" style="color: rgb(217, 236, 255); font-weight: 700; font-style: normal; font-size: 11px;">PER SECOND:</span> <strong id="miner-power">0</strong></span>
+     </div>
+    </div>
+    <div class="click-zone">
+     <div class="orbit" aria-hidden="true"></div><button id="alien-button" class="alien-button" type="button" aria-label="Collect alien coins"> <img data-template-id="clicker-alien-image" class="canva-image" loading="lazy" src="canva://MAHXg5YfkqY/1" alt="Green inflatable alien floating in a blue swimming pool"> </button> <span data-template-id="tap-caption" class="canva-text tap-caption" style="background: rgb(167, 255, 56); color: rgb(6, 40, 23); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.04rem;">Tap the alien</span>
+    </div>
+   </section>
+   <section data-template-id="shop-panel" class="canva-panel shop-panel" aria-labelledby="shop-heading" style="background: rgb(7, 21, 43);">
+    <div class="shop-header">
+     <div>
+      <span data-template-id="shop-kicker" class="eyebrow" style="color: rgb(167, 255, 56);"><i data-lucide="shopping-bag" style="width:14px;height:14px"></i><span data-template-id="shop-kicker-text" class="canva-text" style="color: rgb(167, 255, 56); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Poolside upgrade station</span></span>
+      <h2 data-template-id="shop-heading" class="canva-text m-0 mt-1 font-extrabold tracking-tight" style="color: rgb(242, 249, 255); font-weight: 800; font-style: normal; font-size: 24px;">Spend your signals</h2>
+     </div><span data-template-id="shop-tip" class="canva-text text-sm text-sky-100" style="color: rgb(207, 228, 255); font-weight: 400; font-style: normal; font-size: 14px;">Upgrades stay active while you play.</span>
+    </div>
+    <p id="shop-status" class="shop-status" aria-live="polite"></p>
+    <div class="upgrade-list">
+     <article class="upgrade-card">
+      <div class="upgrade-icon" aria-hidden="true"><i data-lucide="zap" style="width:23px;height:23px"></i>
+      </div>
+      <div>
+       <strong data-template-id="tap-upgrade-name" class="canva-text upgrade-name" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Pool Noodle Tap</strong> <span data-template-id="tap-upgrade-description" class="canva-text upgrade-detail" style="color: rgb(159, 183, 215); font-weight: 400; font-style: normal; font-size: 13px;">Splash out for +1 coin on every tap.</span> <span id="tap-upgrade-meta" class="upgrade-meta">LEVEL 0 · 15 COINS</span>
+      </div><button data-template-id="tap-upgrade-button" id="buy-tap" class="canva-button upgrade-button" type="button" style="background: rgb(167, 255, 56); color: rgb(8, 33, 14); font-weight: 700; font-style: normal; font-size: 12px;">BUY</button>
+     </article>
+     <article class="upgrade-card">
+      <div class="upgrade-icon gold" aria-hidden="true"><i data-lucide="bot" style="width:23px;height:23px"></i>
+      </div>
+      <div>
+       <strong data-template-id="miner-upgrade-name" class="canva-text upgrade-name" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Flotation Device</strong> <span data-template-id="miner-upgrade-description" class="canva-text upgrade-detail" style="color: rgb(159, 183, 215); font-weight: 400; font-style: normal; font-size: 13px;">A pool float drifts in 1 coin every second.</span> <span id="miner-upgrade-meta" class="upgrade-meta">LEVEL 0 · 40 COINS</span>
+      </div><button data-template-id="miner-upgrade-button" id="buy-miner" class="canva-button upgrade-button" type="button" style="background: rgb(167, 255, 56); color: rgb(8, 33, 14); font-weight: 700; font-style: normal; font-size: 12px;">BUY</button>
+     </article>
+     <article class="upgrade-card">
+      <div class="upgrade-icon blue" aria-hidden="true"><i data-lucide="sparkles" style="width:23px;height:23px"></i>
+      </div>
+      <div>
+       <strong data-template-id="multiplier-upgrade-name" class="canva-text upgrade-name" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">Giant Pool Float</strong> <span data-template-id="multiplier-upgrade-description" class="canva-text upgrade-detail" style="color: rgb(159, 183, 215); font-weight: 400; font-style: normal; font-size: 13px;">Double your coins with an oversized inflatable.</span> <span id="multiplier-upgrade-meta" class="upgrade-meta">LEVEL 0 · 120 COINS</span>
+      </div><button data-template-id="multiplier-upgrade-button" id="buy-multiplier" class="canva-button upgrade-button" type="button" style="background: rgb(167, 255, 56); color: rgb(8, 33, 14); font-weight: 700; font-style: normal; font-size: 12px;">BUY</button>
+     </article>
+     <article class="upgrade-card">
+      <div class="upgrade-icon" aria-hidden="true"><i data-lucide="party-popper" style="width:23px;height:23px"></i>
+      </div>
+      <div>
+       <strong data-template-id="pop-upgrade-name" class="canva-text upgrade-name" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 16px;">POP</strong> <span data-template-id="pop-upgrade-description" class="canva-text upgrade-detail" style="color: rgb(159, 183, 215); font-weight: 400; font-style: normal; font-size: 13px;">Every 30 clicks, burst for 90 bonus coins. Kyle rests for 2 seconds.</span> <span id="pop-upgrade-meta" class="upgrade-meta">LOCKED · 90 COINS</span>
+      </div><button data-template-id="pop-upgrade-button" id="buy-pop" class="canva-button upgrade-button" type="button" style="background: rgb(167, 255, 56); color: rgb(8, 33, 14); font-weight: 700; font-style: normal; font-size: 12px;">BUY</button>
+     </article>
+    </div>
+   </section>
+  </main>
+  <script>
+    const game = {
+      coins: 0,
+      tapLevel: 0,
+      minerLevel: 0,
+      multiplierLevel: 0,
+      tapCost: 15,
+      minerCost: 40,
+      multiplierCost: 120,
+      popLevel: 0,
+      clickCount: 0,
+      popCooldown: false
+    };
+
+    const elements = {
+      coins: document.getElementById("coin-count"),
+      tapPower: document.getElementById("tap-power"),
+      minerPower: document.getElementById("miner-power"),
+      tapMeta: document.getElementById("tap-upgrade-meta"),
+      minerMeta: document.getElementById("miner-upgrade-meta"),
+      multiplierMeta: document.getElementById("multiplier-upgrade-meta"),
+      status: document.getElementById("shop-status"),
+      alien: document.getElementById("alien-button"),
+      tapButton: document.getElementById("buy-tap"),
+      minerButton: document.getElementById("buy-miner"),
+      multiplierButton: document.getElementById("buy-multiplier"),
+      popMeta: document.getElementById("pop-upgrade-meta"),
+      popButton: document.getElementById("buy-pop")
+    };
+
+    function tapValue() {
+      return (1 + game.tapLevel) * Math.pow(2, game.multiplierLevel);
+    }
+
+    function minerValue() {
+      return game.minerLevel;
+    }
+
+    function formatNumber(value) {
+      return Math.floor(value).toLocaleString("en-US");
+    }
+
+    function updateGame() {
+      elements.coins.textContent = formatNumber(game.coins);
+      elements.tapPower.textContent = formatNumber(tapValue());
+      elements.minerPower.textContent = formatNumber(minerValue());
+      elements.tapMeta.textContent = `LEVEL ${game.tapLevel} · ${formatNumber(game.tapCost)} COINS`;
+      elements.minerMeta.textContent = `LEVEL ${game.minerLevel} · ${formatNumber(game.minerCost)} COINS`;
+      elements.multiplierMeta.textContent = `LEVEL ${game.multiplierLevel} · ${formatNumber(game.multiplierCost)} COINS`;
+      elements.popMeta.textContent = `LEVEL ${game.popLevel} · 90 COINS`;
+
+      elements.tapButton.disabled = game.coins < game.tapCost;
+      elements.minerButton.disabled = game.coins < game.minerCost;
+      elements.multiplierButton.disabled = game.coins < game.multiplierCost;
+      elements.popButton.disabled = game.coins < 90 || game.popLevel > 0;
+      elements.alien.disabled = game.popCooldown;
+    }
+
+    function showEarned(amount) {
+      const burst = document.createElement("span");
+      burst.className = "floating-coin";
+      burst.textContent = `+${formatNumber(amount)} ✦`;
+      document.querySelector(".click-zone").appendChild(burst);
+      burst.addEventListener("animationend", () => burst.remove());
+    }
+
+    function collectCoins() {
+      const earned = tapValue();
+      game.coins += earned;
+      if (game.popLevel > 0) {
+        game.clickCount += 1;
+        if (game.clickCount >= 30) {
+          game.clickCount = 0;
+          game.coins += 90;
+          game.popCooldown = true;
+          showStatus("POP! +90 coins. Kyle needs a 2-second cooldown!", true);
+          updateGame();
+          showEarned(90);
+          setTimeout(() => {
+            game.popCooldown = false;
+            updateGame();
+          }, 2000);
+        }
+      }
+      elements.alien.classList.remove("popping");
+      void elements.alien.offsetWidth;
+      elements.alien.classList.add("popping");
+      showEarned(earned);
+      updateGame();
+    }
+
+    function showStatus(message, successful) {
+      elements.status.textContent = message;
+      elements.status.style.color = successful ? "#a7ff38" : "#ffd84a";
+    }
+
+    function buyUpgrade(type) {
+      const options = {
+        tap: {
+          cost: "tapCost",
+          level: "tapLevel",
+          message: "Plasma Tap charged. Your click power increased!"
+        },
+        miner: {
+          cost: "minerCost",
+          level: "minerLevel",
+          message: "Moon Miner deployed. It will collect coins every second."
+        },
+        multiplier: {
+          cost: "multiplierCost",
+          level: "multiplierLevel",
+          message: "Cosmic Multiplier online. Your clicks now hit harder!"
+        },
+        pop: {
+          cost: null,
+          level: "popLevel",
+          message: "POP unlocked! Every 30 clicks earns 90 coins, followed by a 2-second cooldown."
+        }
+      };
+
+      const upgrade = options[type];
+      if (type === "pop" && (game.coins < 90 || game.popLevel > 0)) {
+        showStatus("POP costs 90 cosmic coins and can only be unlocked once.", false);
+        return;
+      }
+      if (upgrade.cost && game.coins < game[upgrade.cost]) {
+        showStatus("Not enough cosmic coins yet. Keep tapping the alien!", false);
+        return;
+      }
+
+      if (upgrade.cost) {
+        game.coins -= game[upgrade.cost];
+        game[upgrade.cost] = Math.ceil(game[upgrade.cost] * 1.7);
+      } else {
+        game.coins -= 90;
+      }
+      game[upgrade.level] += 1;
+      showStatus(upgrade.message, true);
+      updateGame();
+    }
+
+    elements.alien.addEventListener("click", collectCoins);
+    elements.tapButton.addEventListener("click", () => buyUpgrade("tap"));
+    elements.minerButton.addEventListener("click", () => buyUpgrade("miner"));
+    elements.multiplierButton.addEventListener("click", () => buyUpgrade("multiplier"));
+    elements.popButton.addEventListener("click", () => buyUpgrade("pop"));
+
+    setInterval(() => {
+      const mined = minerValue();
+      if (mined > 0) {
+        game.coins += mined;
+        updateGame();
+      }
+    }, 1000);
+
+    lucide.createIcons();
+    updateGame();
+  </script>
+ 
+</body></html>
